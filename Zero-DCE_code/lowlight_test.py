@@ -14,7 +14,7 @@ from torchvision import transforms
 from PIL import Image
 import glob
 import time
-
+from thop import profile, clever_format
 
  
 def lowlight(image_path):
@@ -33,7 +33,15 @@ def lowlight(image_path):
 	DCE_net = model.enhance_net_nopool().cuda()
 	DCE_net.load_state_dict(torch.load('snapshots/Epoch99.pth'))
 	start = time.time()
+
 	_,enhanced_image,_ = DCE_net(data_lowlight)
+
+	macs, params = profile(DCE_net, inputs=(data_lowlight, ))
+	macs, params = clever_format([macs, params], "%.3f")
+	print(data_lowlight.size())
+	print(f"macs  : {macs}")
+	print(f"params: {params}")
+
 
 	end_time = (time.time() - start)
 	print(end_time)
